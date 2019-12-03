@@ -88,7 +88,7 @@
 //Those particular statements are setting up timer events.
 
 // ----- motor definitions
-#define STEPS_PER_DEG 1600/360     //motor=200 steps/rev; 16 x microstepping; 4 x belt drive
+#define STEPS_PER_DEG 22400/360     //motor=200 steps/rev; 16 x microstepping; 4 x belt drive
 #define NUDGE STEPS_PER_DEG/4       //rotate the motor 0.25 degrees (change number to suit)
 #define CW 1                        //motor directions
 #define CCW 0
@@ -105,8 +105,8 @@ STEP_M1 = false,
 STEP_M2 = false;
 
 long
-PULSE_WIDTH = 2,                    //easydriver step pulse-width (uS)
-DELAY_MIN = 5000,                   //minimum inter-step delay (uS) between motor steps (controls speed)
+PULSE_WIDTH = 4,                    //easydriver step pulse-width (uS)
+DELAY_MIN = 2500,                   //minimum inter-step delay (uS) between motor steps (controls speed)
 DELAY1,                             //inter-step delay for motor1 (uS)
 DELAY2,                             //inter-step delay for motor2 (uS)
 STEPS1,                             //motor1 steps from 12 o'clock to reach an XY co-ordinate
@@ -119,11 +119,11 @@ STEPS2;                             //motor2 steps from 12 o'clock to reach an X
 #define PEN 3
 
 float
-OFFSET = 210,                       //motor offset along x_axis
+OFFSET = 254,                       //motor offset along x_axis
 YAXIS = 465,                        //motor heights above (0,0)
-LENGTH = 300,                       //length of each arm-segment
+LENGTH = 200,                       //length of each arm-segment
 SCALE_FACTOR = 1,                   //drawing scale (1 = 100%)
-ARC_MAX = 2;                        //maximum arc-length (controls smoothness)
+ARC_MAX = 1;                        //maximum arc-length (controls smoothness)
 
 int
 /*
@@ -163,20 +163,23 @@ void setup()
 {
   // ----- initialise motor1
   pinMode(STEPPERS_ENABLE_PIN, OUTPUT);
+ 
   digitalWrite(STEPPERS_ENABLE_PIN, LOW);
   
   pinMode(DIR1, OUTPUT);
   pinMode(STEP1, OUTPUT);
   digitalWrite(DIR1, CW);
   delayMicroseconds(PULSE_WIDTH);
-  digitalWrite(STEP1, LOW);
+  digitalWrite(STEP1, HIGH);
 
   // ----- initialise motor2
+  pinMode(STEPPERS_ENABLE_PIN, OUTPUT);
+  digitalWrite(STEPPERS_ENABLE_PIN, LOW);
   pinMode(DIR2, OUTPUT);
   pinMode(STEP2, OUTPUT);
   digitalWrite(DIR2, CW);
   delayMicroseconds(PULSE_WIDTH);
-  digitalWrite(STEP2, LOW);
+  digitalWrite(STEP2, HIGH);
 
   // ----- initialise STEPS1, STEPS2 for co-ordinate (0,0)
   calculate_steps(0, 0);
@@ -783,24 +786,24 @@ void step_motors() {
 
   // ----- locals
   enum {dir1, step1, dir2, step2};                                //define bit positions
-  byte pattern = PORTB;                                           //read current state PORTB
+  byte pattern = PORTD;                                           //read current state PORTD
 
   // ----- set motor directions
   (DIRECTION1 == CW) ? SET(pattern, dir1) : CLR(pattern, dir1);
   (DIRECTION2 == CW) ? SET(pattern, dir2) : CLR(pattern, dir2);
-  PORTB = pattern;
+  PORTD = pattern;
   delayMicroseconds(PULSE_WIDTH);                                 //wait for direction lines to stabilise
 
   // ----- create leading edge of step pulse(s)
   (STEP_M1) ? SET(pattern, step1) : CLR(pattern, step1);  //prepare step pulse
   (STEP_M2) ? SET(pattern, step2) : CLR(pattern, step2);
-  PORTB = pattern;                                                //step the motors
+  PORTD = pattern;                                                //step the motors
   delayMicroseconds(PULSE_WIDTH);                                 //mandatory delay
 
   // ----- create trailing-edge of step-pulse(s)
   pattern = CLR(pattern, step1);
   pattern = CLR(pattern, step2);
-  PORTB = pattern;
+  PORTD = pattern;
 }
 
 //--------------------------------------------------------------------
