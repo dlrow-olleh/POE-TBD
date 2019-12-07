@@ -3,15 +3,35 @@ import numpy as np
 
 
 def inverseKinematics(x, y):
-    D = math.sqrt(x ** 2 + y ** 2)
-    if x > 0:
-        angle1 = math.pi + math.atan(x / y) + math.acos(D / 400)
-        angle2 = math.pi + math.atan(x / y) - math.acos(D / 400)
-    else:
-        angle1 = math.pi - math.atan(x / y) + math.acos(D / 400)
-        angle2 = math.pi - math.atan(x / y) - math.acos(D / 400)
 
-    return np.rad2deg(angle1), np.rad2deg(angle2)
+    x *= -1
+
+    OFFSET = 0
+    YAXIS = 0
+    LENGTH = 200
+
+    distance = math.sqrt((OFFSET - x) * (OFFSET - x) + (YAXIS - y) * (YAXIS - y))
+    if (x > OFFSET):
+        angle1 = math.pi + math.acos(distance / (2 * LENGTH)) - math.atan((x - OFFSET) / (YAXIS - y))
+    else:
+        angle1 = math.pi + math.acos(distance / (2 * LENGTH)) + math.atan((OFFSET - x) / (YAXIS - y))
+
+    if (x > OFFSET):
+        angle2 = math.pi - math.acos(distance / (2 * LENGTH)) - math.atan((x - OFFSET) / (YAXIS - y))
+    else:
+        angle2 = math.pi - math.acos(distance / (2 * LENGTH)) + math.atan((OFFSET - x) / (YAXIS - y))
+
+    newangle1 = math.atan2(-math.sin(math.fmod((angle1 + (-math.pi / 2)), math.pi * 2)),
+                           math.cos(math.fmod((angle1 + (-math.pi / 2)), math.pi * 2)))
+    newangle2 = math.atan2(-math.sin(math.fmod((angle2 + (-math.pi / 2)), math.pi * 2)),
+                           math.cos(math.fmod((angle2 + (-math.pi / 2)), math.pi * 2)))
+
+    if newangle1 > math.pi:
+        newangle1 -= 2*math.pi
+    if newangle2 > math.pi:
+        newangle2 -= 2 *math.pi
+
+    return np.rad2deg(newangle1), np.rad2deg(newangle2)
 
 
 def interpolatePoints(P1, P2, res=0.5):

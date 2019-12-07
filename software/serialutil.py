@@ -21,9 +21,10 @@ class GcodeSender:
         initcmd = f"G10 P0 L20 X{x:.3f} Y{y:.3f} Z0"
         self.writeGcode(initcmd)
 
-    def sendangle(self, x, y, feed=300):
+    def sendangle(self,x, y, feed=300):
         cmd = f"G1 X{x:.3f} Y{y:.3f} F{feed:.3f}"
         self.writeGcode(cmd)
+
 
     def writeGcode(self, gcodeLine):
         gcodeLine = (gcodeLine + "\n").encode("utf-8")
